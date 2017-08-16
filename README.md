@@ -12,7 +12,7 @@ See: https://hub.docker.com/r/m00re/jenkins-slave-sphinx/
 
 ## Building
 
-Simply type ```docker build . -t <YourTagName>``` to rebuild the image yourself. However, you do not necessarily need to rebuild the image yourself, I provide pre-built images at https://hub.docker.com/r/m00re/jenkins-slave-hashicorp/.
+Simply type ```docker build . -t <YourTagName>``` to rebuild the image yourself. 
 
 ## Usage
 
