@@ -8,7 +8,7 @@ GROUP_ID=${RUN_WITH_GROUP_ID:-1000}
 
 echo "Starting with UID/GID : $USER_ID/$GROUP_ID"
 /usr/sbin/groupadd --gid $RUN_WITH_GROUP_ID swarm && \
-/usr/sbin/useradd --uid $RUN_WITH_USER_ID --gid $RUN_WITH_GROUP_ID --shell /bin/bash swarm
+/usr/sbin/useradd --uid $RUN_WITH_USER_ID --gid $RUN_WITH_GROUP_ID --shell /bin/bash -d $SWARM_HOME swarm
 
 chown -R swarm:swarm $SWARM_HOME $SWARM_WORKDIR
 chmod +x $SWARM_HOME/swarm-client.jar
