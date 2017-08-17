@@ -35,6 +35,22 @@ to spawn a new Jenkins slave docker container with ```2 executors```, Jenkins la
 
 > **NOTE: Please be aware that the above example uses HTTP to connect your slave node to the master node. This is not recommended. Instead, use a setup as provided below, in which master and slave nodes are linked over a virtual private Docker network.**
 
+## Advanced configuration
+
+This Docker image provides additional configuration options. By default, the container will create a new user and a new 
+group called ```swarm``` inside of the Docker container, using the default user and group IDs ```1000```. To override the
+ IDs, simply use the environment variables ```RUN_WITH_USER_ID``` and ```RUN_WITH_GROUP_ID```.
+ 
+In addition, it is possible to inject / populate the home directory of the ```swarm``` user with settings from the host
+machine. If the environment variable ```IMPORT_HOME_FROM``` is set and pointing to a host-mounted volume that includes
+files and directories, all of these files and directories will be copied to the home directory of the ```swarm``` user
+and owner-changed accordingly. For instance, the following command will import all files from /root/.ssh/ into the home
+directory of the ```swarm``` user.
+
+```bash
+$ sudo docker run -e IMPORT_HOME_FROM=/inject -v /root/.ssh/:/inject/.ssh:Z -it m00re/jenkins-slave-sphinx:1.6.3
+```
+
 ## Acknowledgements
 
 A huge thank you goes to [blacklabelops](https://github.com/blacklabelops/) for his Dockerfile recipes in https://github.com/blacklabelops/swarm/tree/master/hashicorp-virtualbox and https://github.com/blacklabelops/jenkins-swarm. His scripts served as the starting point for the above image.

@@ -2,68 +2,36 @@
 
 set -o errexit
 
-if [ -n "${SWARM_DELAYED_START}" ]; then
-  sleep ${SWARM_DELAYED_START}
+# Step 1: dynamically create user
+USER_ID=${RUN_WITH_USER_ID:-1000}
+GROUP_ID=${RUN_WITH_GROUP_ID:-1000}
+
+echo "Starting with UID/GID : $USER_ID/$GROUP_ID"
+/usr/sbin/groupadd --gid $RUN_WITH_GROUP_ID swarm && \
+/usr/sbin/useradd --uid $RUN_WITH_USER_ID --gid $RUN_WITH_GROUP_ID --shell /bin/bash swarm
+
+chown -R swarm:swarm $SWARM_HOME $SWARM_WORKDIR
+chmod +x $SWARM_HOME/swarm-client.jar
+
+export HOME=$SWARM_HOME
+
+# Step 2: import ssh keys
+if [ -d "$IMPORT_HOME_FROM" ]; then
+  echo "Importing files and directories from $IMPORT_HOME_FROM into $SWARM_HOME"
+  for f in "$IMPORT_HOME_FROM"/* "$IMPORT_HOME_FROM"/.*; do
+    # do not handle ".", "..", and "*" result
+    if [ "$f" != "$IMPORT_HOME_FROM/." ] && [ "$f" != "$IMPORT_HOME_FROM/.." ] && [ "$f" != "$IMPORT_HOME_FROM/*" ]; then
+      cp -rvf $f $SWARM_HOME/
+    fi
+  done
+  chown -R swarm:swarm $SWARM_HOME
 fi
 
-if [ -n "${SWARM_ENV_FILE}" ]; then
-  source ${SWARM_ENV_FILE}
-fi
-
-jenkins_default_parameters="-disableSslVerification"
-
-java_vm_parameters=""
-
-if [ -n "${SWARM_VM_PARAMETERS}" ]; then
-  java_vm_parameters=${SWARM_VM_PARAMETERS}
-fi
-
-jenkins_master="http://jenkins:8080"
-
-if [ -n "${SWARM_MASTER_URL}" ]; then
-  jenkins_master=${SWARM_MASTER_URL}
-fi
-
-jenkins_swarm_parameters=""
-
-if [ -n "${SWARM_CLIENT_PARAMETERS}" ]; then
-  jenkins_swarm_parameters=${SWARM_CLIENT_PARAMETERS}
-fi
-
-jenkins_user=""
-
-if [ -n "${SWARM_JENKINS_USER}" ] && [ -n "${SWARM_JENKINS_PASSWORD}" ]; then
-  jenkins_user="-username "${SWARM_JENKINS_USER}" -password "${SWARM_JENKINS_PASSWORD}
-fi
-
-jenkins_executors=""
-
-if [ -n "${SWARM_CLIENT_EXECUTORS}" ]; then
-  jenkins_executors="-executors "${SWARM_CLIENT_EXECUTORS}
-fi
-
-swarm_node_name=""
-
-if [ -n "${SWARM_CLIENT_NAME}" ]; then
-  swarm_node_name="-name '"${SWARM_CLIENT_NAME}"'"
-fi
-
-unset SWARM_JENKINS_USER
-unset SWARM_JENKINS_PASSWORD
-unset SWARM_MASTER_URL
-
-jenkins_workdir="-fsroot "${SWARM_WORKDIR}
-
+# Step 3: run Jenkins (or just the provided command)
 if [ "$1" = 'swarm' ]; then
-  # Run the Swarm-Client according to environment variables.
-  if [ -n "${SWARM_CLIENT_LABELS}" ]; then
-    exec ${SWARM_JAVA_HOME}/bin/java -Dfile.encoding=UTF-8 ${java_vm_parameters} -jar ${SWARM_HOME}/swarm-client.jar ${jenkins_default_parameters} -master ${jenkins_master} ${swarm_node_name} ${jenkins_executors} ${jenkins_user} ${jenkins_swarm_parameters} ${jenkins_workdir} -labels "${SWARM_CLIENT_LABELS}"
-  else
-    exec ${SWARM_JAVA_HOME}/bin/java -Dfile.encoding=UTF-8 ${java_vm_parameters} -jar ${SWARM_HOME}/swarm-client.jar ${jenkins_default_parameters} -master ${jenkins_master} ${swarm_node_name} ${jenkins_executors} ${jenkins_user} ${jenkins_swarm_parameters} ${jenkins_workdir}
-  fi
+  exec /usr/bin/gosu swarm $SWARM_HOME/run-jenkins.sh "$@"
 elif [[ "$1" == '-'* ]]; then
-  # Run the Swarm-Client with passed parameters.
-  exec ${SWARM_JAVA_HOME}/bin/java $JAVA_OPTS -jar ${SWARM_HOME}/swarm-client.jar "$@"
+  exec /usr/bin/gosu swarm $SWARM_HOME/run-jenkins.sh "$@"
 else
   exec "$@"
 fi
