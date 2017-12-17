@@ -5,7 +5,7 @@ A Jenkins-Slave Docker image including Sphinx, Breathe and Doxygen pre-installed
 ## Available Docker Images at DockerHub
 
 Image Name                    | Tag     | Sphinx | Jinja2 | Breathe | Doxygen | Swarm Client
-------------------------------|---------|--------|--------|---------|-----------------------
+------------------------------|---------|--------|--------|---------|---------|-------------
 m00re/jenkins-slave-sphinx    | 1.6.3-2 | 1.6.3  | 2.9.6  | 4.7.1   | 1.8.5-3 | 3.6
 m00re/jenkins-slave-sphinx    | 1.6.3   | 1.6.3  | 2.9.6  | 4.7.1   | 1.8.5-3 | 3.4
 
