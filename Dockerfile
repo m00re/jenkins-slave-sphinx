@@ -2,8 +2,8 @@ FROM centos:7.3.1611
 MAINTAINER Jens Mittag <kontakt@jensmittag.de>
 
 # Jenkins Swarm Version
-ARG SWARM_VERSION=3.4
-ARG SWARM_SHA=ef74404b14710491ca7e416bb9bed29f7f5236db
+ARG SWARM_VERSION=3.6
+ARG SWARM_SHA=e9ee5866393ccae0d4b5500ce5521e2850c98cf7
 
 # Tini Zombie Reaper and Signal Forwarder Version
 ARG TINI_VERSION=0.13.2
